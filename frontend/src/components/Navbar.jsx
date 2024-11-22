@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Logo from '../assets/bg-image.jpeg';
+import Logo from '../assets/logo-grayscale.png';
 import ProfileInfo from './ProfileInfo';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from './input/SearchBar';
@@ -36,7 +36,16 @@ const Navbar = ({
     <div className="sticky top-0 bg-white z-10 shadow-md">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center px-4 md:px-6 py-3">
-          <img src={Logo} alt="logo" className="h-8 md:h-9 flex-shrink-0" />
+          <div className="flex items-center gap-2">
+            <img
+              src={Logo}
+              alt="logo"
+              className="h-10 w-auto md:h-12 flex-shrink-0"
+            />
+            <span className="text-xl md:text-2xl font-bold text-gray-800">
+              TripTales
+            </span>
+          </div>
 
           {/* Desktop View */}
           {isToken && (
