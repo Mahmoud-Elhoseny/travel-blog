@@ -5,21 +5,32 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 export const register = async (req, res) => {
-  const { fullName, email, password } = req.body;
-
-  const userExists = await User.findOne({ where: { fullName, email } });
-  if (!fullName || !email || !password) {
-    res.status(400).json({ error: 'Please fill in all fields' });
-    return;
-  }
-  if (userExists) {
-    res
-      .status(400)
-      .json({ error: 'User already exists', message: 'User already exists' });
-    return;
-  }
-
   try {
+    const { fullName, email, password } = req.body;
+
+    if (!fullName || !email || !password) {
+      return res.status(400).json({
+        error: true,
+        message: 'Please fill in all fields',
+      });
+    }
+
+    const emailExists = await User.findOne({ where: { email } });
+    if (emailExists) {
+      return res.status(400).json({
+        error: true,
+        message: 'Email already exists',
+      });
+    }
+
+    const fullNameExists = await User.findOne({ where: { fullName } });
+    if (fullNameExists) {
+      return res.status(400).json({
+        error: true,
+        message: 'This username is already taken',
+      });
+    }
+
     const user = await User.create({
       fullName,
       email,
@@ -37,44 +48,80 @@ export const register = async (req, res) => {
       error: false,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Register error:', error);
+    return res.status(500).json({
+      error: true,
+      message: 'Internal server error during registration',
+    });
   }
 };
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    res.status(400).json({ error: 'email and password are required' });
-    return;
-  }
-  const user = await User.findOne({ where: { email } });
-  if (!user) {
-    res.status(404).json({ error: 'User not found' });
-    return;
-  }
+  try {
+    const { email, password } = req.body;
 
-  const passwordIsValid = bcrypt.compareSync(password, user.password);
+    if (!email || !password) {
+      return res.status(400).json({
+        error: true,
+        message: 'Email and password are required',
+      });
+    }
 
-  if (!passwordIsValid) {
-    res.status(401).json({ error: 'Invalid password' });
-    return;
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(401).json({
+        error: true,
+        message: 'Invalid credentials',
+      });
+    }
+
+    const passwordIsValid = bcrypt.compareSync(password, user.password);
+    if (!passwordIsValid) {
+      return res.status(401).json({
+        error: true,
+        message: 'Invalid credentials',
+      });
+    }
+
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: '72h',
+    });
+
+    return res.status(200).json({
+      error: false,
+      message: 'User logged in successfully',
+      user,
+      token,
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    return res.status(500).json({
+      error: true,
+      message: 'Internal server error during login',
+    });
   }
-  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-    expiresIn: '72h',
-  });
-  res.status(200).json({
-    user,
-    token,
-    message: 'User logged in successfully',
-    error: false,
-  });
 };
 
 export const getUser = async (req, res) => {
-  const user = await User.findOne({ where: { id: req.user.id } });
-  if (!user) {
-    res.status(404).json({ error: 'User not found' });
-    return;
+  try {
+    const user = await User.findOne({ where: { id: req.user.id } });
+    if (!user) {
+      return res.status(404).json({
+        error: true,
+        message: 'User not found',
+      });
+    }
+
+    return res.status(200).json({
+      error: false,
+      message: 'User found successfully',
+      user,
+    });
+  } catch (error) {
+    console.error('Get user error:', error);
+    return res.status(500).json({
+      error: true,
+      message: 'Internal server error while fetching user',
+    });
   }
-  return res.json({ user, error: false, message: 'User found' });
 };

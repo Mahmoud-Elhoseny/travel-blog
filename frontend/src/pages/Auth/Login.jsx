@@ -20,15 +20,15 @@ const Login = () => {
       return;
     }
     setError(null);
-
     setIsLoading(true);
-
     try {
       const response = await axiosInstance.post('/auth/login', {
         email,
         password,
       });
       if (response.data && response.data.token) {
+        console.log(response);
+        
         localStorage.setItem('token', response.data.token);
         navigate('/dashboard');
       }

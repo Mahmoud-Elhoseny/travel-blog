@@ -138,7 +138,8 @@ const Home = () => {
         getAllTravelStories();
       }
     } catch (error) {
-      toast.error('Something went wrong');
+      
+      toast.error(error.response.data.error);
       console.log(error);
     }
   };

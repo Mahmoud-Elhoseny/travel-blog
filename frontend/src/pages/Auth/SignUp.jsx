@@ -38,15 +38,11 @@ const SignUp = () => {
         navigate('/dashboard');
       }
     } catch (error) {
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
+      if (error.response && error.response.data.error) {
         setError(error.response.data.message);
       } else {
         console.log(error);
-        setError('Something went wrong');
+        setError('Something went wrong, please try again later.');
       }
     } finally {
       setIsLoading(false);
@@ -89,8 +85,8 @@ const SignUp = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
             {error && <p className="text-xs pb-1 text-red-500">{error}</p>}
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn-primary w-full relative"
               disabled={isLoading}
             >
