@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: 'https://back-blog-1.onrender.com',
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
